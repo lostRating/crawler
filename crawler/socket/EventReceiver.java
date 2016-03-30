@@ -3,7 +3,6 @@ package socket;
 import java.net.Socket;
 import common.Core;
 import com.google.gson.Gson;
-import common.Event;
 
 public class EventReceiver extends BaseConnection {
 	private Core core;
@@ -15,9 +14,7 @@ public class EventReceiver extends BaseConnection {
 	
 	@Override
 	protected void transaction() throws Exception {
-		// TODO Auto-generated method stub
-		Event event = new Gson().fromJson(this.readString(), Event.class);
-		//core.handleJson(event);
+		core.receiveEvent(this.readString());
 	}
 
 }
