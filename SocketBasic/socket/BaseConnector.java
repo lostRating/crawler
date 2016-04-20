@@ -8,13 +8,13 @@ public class BaseConnector extends Thread {
 	private int port;
 	private int timeout;
 	private int trails;
-	private String connection;
+	private BaseConnection conn;
 
-	public BaseConnector(String host, int port, String connection, int timeout,
+	public BaseConnector(String host, int port, BaseConnection conn, int timeout,
 			int trails) {
 		this.host = host;
 		this.port = port;
-		this.connection = connection;
+		this.conn = conn;
 		this.timeout = timeout;
 		if (trails == 0)
 			trails = -1;
@@ -39,8 +39,8 @@ public class BaseConnector extends Thread {
 		this.trails = trails;
 	}
 
-	public void setConnection(String connection) {
-		this.connection = connection;
+	public void setConnection(BaseConnection con) {
+		this.conn = conn;
 	}
 
 	private Socket socket = null;
@@ -52,8 +52,6 @@ public class BaseConnector extends Thread {
 				socket = new Socket();
 				socket.connect(new InetSocketAddress(host, port), timeout);
 				System.out.println("Connected "+socket.getLocalPort()+" "+socket.getPort());
-				BaseConnection conn = (BaseConnection) Class.forName(
-						connection).newInstance();
 				conn.setSocket(socket);
 				conn.run();
 			} catch (Exception e) {

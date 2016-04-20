@@ -16,5 +16,4 @@ public class EventReceiver extends BaseConnection {
 	protected void transaction() throws Exception {
 		core.receiveEvent(this.readString());
 	}
-
 }

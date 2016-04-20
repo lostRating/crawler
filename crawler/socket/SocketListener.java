@@ -24,7 +24,6 @@ public class SocketListener extends Thread {
 					new EventReceiver(socket, core).start();
 				}
 			} catch (Exception e) {
-				System.err.println("SocketListener Error");
 				e.printStackTrace();
 			} finally {
 				try {
