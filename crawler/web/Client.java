@@ -3,28 +3,68 @@ package web;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
-import org.apache.http.HttpEntity;
-import org.apache.http.StatusLine;
+
+import org.apache.http.HeaderIterator;
+import org.apache.http.HttpHeaders;
+import org.apache.http.client.config.CookieSpecs;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
+import common.Config;
+import common.GsonUtils;
+
 public class Client {
-	private HashSet<String> successResponse = new HashSet<String> (Arrays.asList("HTTP/1.1 200 OK"));
+	private static String userAgent = "Mozilla/5.0 (Windows NT 6.1; rv:6.0.2) Gecko/20100101 Firefox/6.0.2";
+	private static HashSet<String> successResponse = new HashSet<String> (Arrays.asList("HTTP/1.1 200 OK"));
 	
-	public String getPage(String url) {
-		CloseableHttpClient httpClient = HttpClients.createDefault();
-		HttpUriRequest request = new HttpGet(url);
-		for (int i = 0; i < 3; ++i) {
+	static CloseableHttpClient client;
+	
+	static {
+		RequestConfig config = RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD_STRICT).build();
+		client = HttpClients.custom().setDefaultRequestConfig(config).build();
+	}
+	
+	static CloseableHttpResponse doGet(String url, String cookie, String refer) throws IOException {
+		HttpGet get = new HttpGet(url);
+		if (cookie != null) {
+			get.setHeader("Cookie", cookie);
+		}
+		if (refer != null) {
+			get.setHeader("Referer", refer);
+		}
+		get.setHeader(HttpHeaders.USER_AGENT, userAgent);
+		CloseableHttpResponse response = client.execute(get);
+		return response;
+	}
+	
+	static CloseableHttpResponse doPost(String url, String cookie, String refer) throws IOException {
+		HttpPost post = new HttpPost(url);
+		if (cookie != null) {
+			post.setHeader("Cookie", cookie);
+		}
+		if (refer != null) {
+			post.setHeader("Referer", refer);
+		}
+		CloseableHttpResponse response = client.execute(post);
+		return response;
+	}
+	
+	static public String getPage(String url) {
+		for (int i = 0; i < Config.webClientRetryTimes; ++i) {
 			try {
-				CloseableHttpResponse response = httpClient.execute(request);
+				CloseableHttpResponse response = doGet(url, null, null);
 				String statusLine = response.getStatusLine().toString();
-				String ret = EntityUtils.toString(response.getEntity(), "GBK");
+				/*HeaderIterator itr = response.headerIterator();
+				while (itr.hasNext()) {
+					System.out.println(itr.nextHeader());
+				}*/
+				String ret = EntityUtils.toString(response.getEntity());
 				response.close();
-				httpClient.close();
 				if (successResponse.contains(statusLine))
 					return ret;
 			} catch (IOException e) {
@@ -32,7 +72,7 @@ public class Client {
 			}
 			
 			try {
-				Thread.sleep(1000);
+				Thread.sleep(Config.webClientFailWatiTime);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -41,7 +81,7 @@ public class Client {
 	}
 	
 	static public void main(String args[]) {
-		Client client = new Client();
-		System.out.println(client.getPage("http://www.baidu.com"));
+		String page = getPage("https://en.wikipedia.org/wiki/Wiki");
+		System.out.println(page);
 	}
 }

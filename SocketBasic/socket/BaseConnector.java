@@ -51,7 +51,7 @@ public class BaseConnector extends Thread {
 			try {
 				socket = new Socket();
 				socket.connect(new InetSocketAddress(host, port), timeout);
-				System.out.println("Connected "+socket.getLocalPort()+" "+socket.getPort());
+				//System.out.println("Connected "+socket.getLocalPort()+" "+socket.getPort());
 				conn.setSocket(socket);
 				conn.run();
 			} catch (Exception e) {

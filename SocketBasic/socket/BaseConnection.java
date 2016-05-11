@@ -108,6 +108,7 @@ public abstract class BaseConnection extends Thread {
 			transaction();
 
 		} catch (Exception e) {
+			e.printStackTrace();
 		}
 		try {
 			socket.close();

@@ -1,9 +1,12 @@
 package client;
 
 import socket.SocketListener;
+import common.Config;
 
 public class ClientEntry {
 	static public void main(String args[]) {
-		new SocketListener(8081, new ClientCore()).start();
+		ClientCore core = new ClientCore(Config.host, Config.serverPort);
+		new SocketListener(Config.clientPort, core).start();
+		core.start();
 	}
 }

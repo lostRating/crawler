@@ -14,6 +14,13 @@ public class EventReceiver extends BaseConnection {
 	
 	@Override
 	protected void transaction() throws Exception {
-		core.receiveEvent(this.readString());
+		String ip = socket.getInetAddress().getHostAddress();
+		int port = socket.getPort(); 
+				
+		String str = "";
+		int cnt = this.readInt();
+		for (int i = 0; i < cnt; ++i)
+			str += this.readString();
+		core.handleEvent(ip, str);
 	}
 }
