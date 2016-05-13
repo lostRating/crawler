@@ -31,7 +31,7 @@ public class WikiTask extends Task {
 			ArrayList<String> value = new ArrayList<String>();
 			key.add("url"); key.add("data"); key.add("status");
 			value.add("https://en.wikipedia.org/wiki/Wiki"); value.add(""); value.add("pending");
-			db.insert("WIKI", key, value);
+			//db.insert("WIKI", key, value);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -44,7 +44,7 @@ public class WikiTask extends Task {
 			try {
 				ResultSet res = db.getDb().createStatement().executeQuery("select * from WIKI where status = pending order by logId limit = " + String.valueOf(cnt));
 				while (res.next()) {
-					db.getDb().createStatement().execute("update WIKI");
+					db.getDb().createStatement().execute("update WIKI where ");
 				}
 			} catch (Exception e) {
 				e.printStackTrace();

@@ -13,6 +13,83 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 public class DbConnector {
+	public class ListPair {
+		String tableName;
+		ArrayList<String> keys;
+		ArrayList<String> ops;
+		ArrayList<String> vals;
+		Integer limit;
+		
+		public ListPair(String tableName) {
+			this.tableName = tableName;
+			keys = new ArrayList<String>();
+			ops = new ArrayList<String>();
+			vals = new ArrayList<String>();
+			limit = null;
+		}
+	
+		public ListPair set(String key, String val) {
+			keys.add(key);
+			ops.add("=");
+			vals.add(val);
+			return this;
+		}
+		
+		public ListPair set(String key, String op, String val) {
+			keys.add(key);
+			ops.add(op);
+			vals.add(val);
+			return this;
+		}
+		
+		public ListPair top(int limit) {
+			this.limit = new Integer(limit);
+			return this;
+		}
+		
+		public void insert() throws SQLException {
+			String sql = "insert into " + tableName + "(";
+			for (int i = 0; i < keys.size(); ++i) {
+				String s = keys.get(i);
+				sql += s;
+				if (i + 1 < keys.size()) sql += ",";
+				else sql += ")";
+			}
+			sql += " value(";
+			for (int i = 0; i < vals.size(); ++i) {
+				String s = "?";
+				sql += s;
+				if (i + 1 < vals.size()) sql += ",";
+				else sql += ")";
+			}
+			sql += ";";
+			PreparedStatement stmt = getDb().prepareStatement(sql);
+			for (int i = 0; i < vals.size(); ++i) {
+				stmt.setString(i + 1, vals.get(i));
+			}
+			stmt.execute();
+		}
+		
+		public ResultSet Select() throws SQLException {
+			String sql = "select * from " + tableName;
+			if (keys.size() > 0)
+				sql += " where";
+			for (int i = 0; i < keys.size(); ++i) {
+				if (i > 0)
+					sql += " and";
+				sql += " " + keys.get(i) + " = ?";
+			}
+			if (limit != null)
+				sql += " limit " + limit.intValue();
+			System.out.println(sql);
+			PreparedStatement stmt = getDb().prepareStatement(sql);
+			for (int i = 0; i < vals.size(); ++i) {
+				stmt.setString(i + 1, vals.get(i));
+			}
+			return stmt.executeQuery();
+		}
+	}
+	
 	Connection getUrl() {
 		try {
 			Connection conn = DriverManager.getConnection(
@@ -66,27 +143,8 @@ public class DbConnector {
 		return stmt.execute(sql);
 	}
 	
-	public boolean insert(String table, ArrayList<String> key, ArrayList<String> value) throws SQLException {
-		String sql = "insert into " + table + "(";
-		for (int i = 0; i < key.size(); ++i) {
-			String s = key.get(i);
-			sql += s;
-			if (i + 1 < key.size()) sql += ",";
-			else sql += ")";
-		}
-		sql += " value(";
-		for (int i = 0; i < value.size(); ++i) {
-			String s = "?";
-			sql += s;
-			if (i + 1 < value.size()) sql += ",";
-			else sql += ")";
-		}
-		sql += ";";
-		PreparedStatement stmt = getDb().prepareStatement(sql);
-		for (int i = 0; i < value.size(); ++i) {
-			stmt.setString(i + 1, value.get(i));
-		}
-		return stmt.execute();
+	public ListPair selectTable(String tableName) {
+		return new ListPair(tableName);
 	}
 	
 	static public void main(String args[]) {
@@ -99,17 +157,12 @@ public class DbConnector {
 			wiki.addSchema("data", "VARCHAR(8000)");
 			wiki.addSchema("status", "VARCHAR(255)").setIndex();
 			db.excuteSQL(wiki.getCreatTableStatement());
-			ArrayList<String> key = new ArrayList<String>();
-			ArrayList<String> value = new ArrayList<String>();
-			key.add("url"); key.add("data"); key.add("status");
-			value.add("1"); value.add("2"); value.add("3");
-			db.insert("WIKI", key, value);
-			key = new ArrayList<String>();
-			value = new ArrayList<String>();
-			key.add("url"); key.add("data"); key.add("status");
-			value.add("2"); value.add("2"); value.add("3");
-			db.insert("WIKI", key, value);
-			ResultSet res = db.getDb().createStatement().executeQuery("SELECT * FROM WIKI WHERE status = 3 order BY logId limit 1");
+			
+			db.selectTable("WIKI").set("url", "1").set("data", "2").set("status", "3").insert();
+			db.selectTable("WIKI").set("url", "4").set("data", "5").set("status", "6").insert();
+			ResultSet res;
+			res = db.selectTable("WIKI").set("url", "1").top(1).Select();
+			//res = db.getDb().createStatement().executeQuery("SELECT * FROM WIKI WHERE status = 3 order BY logId limit 1");
 			while (res.next()) {
 				System.out.println("logId = " + res.getLong(1));
 				System.out.println("url = " + res.getString(2));
