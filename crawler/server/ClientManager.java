@@ -13,13 +13,13 @@ import common.Config;
 import event.Event;
 import event.EventType;
 
-public class Manager extends Thread {
+public class ClientManager {
 	private ServerCore core;
 	private Map<String, String> ipToClientKey;
 	private Map<String, LinkedList<Event>> clientKeyToJob;
 	private String clientKeyLock = new String("0"); //ipPortToClientKey, clientKeyToJob
 	
-	public Manager(ServerCore core) {
+	public ClientManager(ServerCore core) {
 		this.core = core;
 		ipToClientKey = new HashMap<String, String>();
 		clientKeyToJob = new HashMap<String, LinkedList<Event>>();
@@ -60,13 +60,6 @@ public class Manager extends Thread {
 				clientKeyToJob.remove(clientKey);
 				ipToClientKey.remove(ip);
 			}
-		}
-	}
-	
-	@Override
-	public void run() {
-		while (!Thread.interrupted()) {
-			
 		}
 	}
 }

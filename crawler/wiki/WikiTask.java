@@ -26,12 +26,8 @@ public class WikiTask extends Task {
 			wiki.addSchema("url", "VARCHAR(255)").setUnique();
 			wiki.addSchema("data", "INT");
 			wiki.addSchema("status", "VARCHAR(255)").setIndex();
-			db.excuteSQL(wiki.getCreatTableStatement());
-			ArrayList<String> key = new ArrayList<String>();
-			ArrayList<String> value = new ArrayList<String>();
-			key.add("url"); key.add("data"); key.add("status");
-			value.add("https://en.wikipedia.org/wiki/Wiki"); value.add(""); value.add("pending");
-			//db.insert("WIKI", key, value);
+			db.executeSQL(wiki.getCreateTableStatement());
+			db.setTable("WIKI").set("url", "https://en.wikipedia.org/wiki/Wiki").set("data", "").set("status", "pending").insert();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -39,7 +35,7 @@ public class WikiTask extends Task {
 	
 	@Override
 	public void run() {
-		while (true) {
+	/*	while (true) {
 			int cnt = core.restJobQueueSize();
 			try {
 				ResultSet res = db.getDb().createStatement().executeQuery("select * from WIKI where status = pending order by logId limit = " + String.valueOf(cnt));
@@ -54,7 +50,7 @@ public class WikiTask extends Task {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		}
+		}*/
 	}
 
 }

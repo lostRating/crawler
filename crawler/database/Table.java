@@ -56,7 +56,7 @@ public class Table {
 		return sch;
 	}
 	
-	public String getCreatTableStatement() {
+	public String getCreateTableStatement() {
 		String res = "CREATE TABLE ";
 		ArrayList<String> indexList = new ArrayList<String>();
 		ArrayList<String> UniqueList = new ArrayList<String>();

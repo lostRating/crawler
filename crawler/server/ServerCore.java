@@ -10,21 +10,19 @@ import com.google.gson.Gson;
 import common.Config;
 import common.GsonUtils;
 import common.Core;
+import common.WorkManager;
 import event.Event;
 import event.EventType;
 
 public class ServerCore extends Core {
-	private Manager manager;
+	WorkManager workManager;
+	ClientManager clientManager;
 	LinkedList<EventSender> eventSenders;
 	LinkedList<Event> jobQueue;
 	
 	public ServerCore() {
-		manager = new Manager(this);
-		manager.start();
-		eventSenders = new LinkedList<EventSender>();
-		
-		for (int i = 0; i < Config.serverSender; ++i)
-			new Sender(this).start();
+		clientManager = new ClientManager(this);
+		workManager = new WorkManager(Config.serverWorkerSize);
 	}
 	
 	public void addEventSender(EventSender eventSender) {
@@ -49,9 +47,9 @@ public class ServerCore extends Core {
 		if (event.getHandler() != null) {
 			
 		} else if (event.getEventType() == EventType.ClientOnline) {
-			manager.clientOnline(ip);
+			clientManager.clientOnline(ip);
 		} else if (event.getEventType() == EventType.ClientOffline) {
-			manager.clientOffline(ip);
+			clientManager.clientOffline(ip);
 		}
 	}
 }

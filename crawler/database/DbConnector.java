@@ -13,14 +13,15 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 public class DbConnector {
-	public class ListPair {
+	
+	public class DbOperation {
 		String tableName;
 		ArrayList<String> keys;
 		ArrayList<String> ops;
 		ArrayList<String> vals;
 		Integer limit;
 		
-		public ListPair(String tableName) {
+		public DbOperation(String tableName) {
 			this.tableName = tableName;
 			keys = new ArrayList<String>();
 			ops = new ArrayList<String>();
@@ -28,21 +29,21 @@ public class DbConnector {
 			limit = null;
 		}
 	
-		public ListPair set(String key, String val) {
+		public DbOperation set(String key, String val) {
 			keys.add(key);
 			ops.add("=");
 			vals.add(val);
 			return this;
 		}
 		
-		public ListPair set(String key, String op, String val) {
+		public DbOperation set(String key, String op, String val) {
 			keys.add(key);
 			ops.add(op);
 			vals.add(val);
 			return this;
 		}
 		
-		public ListPair top(int limit) {
+		public DbOperation top(int limit) {
 			this.limit = new Integer(limit);
 			return this;
 		}
@@ -63,14 +64,14 @@ public class DbConnector {
 				else sql += ")";
 			}
 			sql += ";";
-			PreparedStatement stmt = getDb().prepareStatement(sql);
+			PreparedStatement stmt = getConnection().prepareStatement(sql);
 			for (int i = 0; i < vals.size(); ++i) {
 				stmt.setString(i + 1, vals.get(i));
 			}
 			stmt.execute();
 		}
 		
-		public ResultSet Select() throws SQLException {
+		public ResultSet select() throws SQLException {
 			String sql = "select * from " + tableName;
 			if (keys.size() > 0)
 				sql += " where";
@@ -82,7 +83,7 @@ public class DbConnector {
 			if (limit != null)
 				sql += " limit " + limit.intValue();
 			System.out.println(sql);
-			PreparedStatement stmt = getDb().prepareStatement(sql);
+			PreparedStatement stmt = getConnection().prepareStatement(sql);
 			for (int i = 0; i < vals.size(); ++i) {
 				stmt.setString(i + 1, vals.get(i));
 			}
@@ -103,7 +104,7 @@ public class DbConnector {
 		return null;
 	}
 	
-	public Connection getDb() {
+	public Connection getConnection() {
 		try {
 			Connection conn = DriverManager.getConnection(
 					DbConfig.getDb(),
@@ -124,27 +125,23 @@ public class DbConnector {
 		}
 	}
 	
-	public boolean init() throws SQLException {
+	public void init() throws SQLException {
 		clear();
-		Connection conn = getUrl();
-		Statement stmt = conn.createStatement();
-		return stmt.execute("CREATE DATABASE " + DbConfig.dbName);
+		executeSQL("CREATE DATABASE " + DbConfig.dbName);
 	}
 	
-	public boolean clear() throws SQLException {
-		Connection con = getUrl();
+	public void clear() throws SQLException {
+		executeSQL("DROP DATABASE IF EXISTS " + DbConfig.dbName);
+	}
+	
+	public void executeSQL(String sql) throws SQLException {
+		Connection con = getConnection();
 		Statement stmt = con.createStatement();
-		return stmt.execute("DROP DATABASE IF EXISTS " + DbConfig.dbName);
+		stmt.execute(sql);
 	}
 	
-	public boolean excuteSQL(String sql) throws SQLException {
-		Connection con = getDb();
-		Statement stmt = con.createStatement();
-		return stmt.execute(sql);
-	}
-	
-	public ListPair selectTable(String tableName) {
-		return new ListPair(tableName);
+	public DbOperation setTable(String tableName) {
+		return new DbOperation(tableName);
 	}
 	
 	static public void main(String args[]) {
@@ -156,12 +153,12 @@ public class DbConnector {
 			wiki.addSchema("url", "VARCHAR(255)").setUnique();
 			wiki.addSchema("data", "VARCHAR(8000)");
 			wiki.addSchema("status", "VARCHAR(255)").setIndex();
-			db.excuteSQL(wiki.getCreatTableStatement());
+			db.executeSQL(wiki.getCreateTableStatement());
 			
-			db.selectTable("WIKI").set("url", "1").set("data", "2").set("status", "3").insert();
-			db.selectTable("WIKI").set("url", "4").set("data", "5").set("status", "6").insert();
+			db.setTable("WIKI").set("url", "1").set("data", "2").set("status", "3").insert();
+			db.setTable("WIKI").set("url", "4").set("data", "5").set("status", "6").insert();
 			ResultSet res;
-			res = db.selectTable("WIKI").set("url", "1").top(1).Select();
+			res = db.setTable("WIKI").set("url", "1").top(1).select();
 			//res = db.getDb().createStatement().executeQuery("SELECT * FROM WIKI WHERE status = 3 order BY logId limit 1");
 			while (res.next()) {
 				System.out.println("logId = " + res.getLong(1));

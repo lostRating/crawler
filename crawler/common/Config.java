@@ -17,5 +17,11 @@ public class Config {
 	static public int webClientRetryTimes = 3;
 	static public int webClientFailWatiTime = 2000; 
 	
-	static public int serverSender = 1;
+	static public int serverWorkerSize = 10;
+	
+	static public int workRetryTimes = 3;
+	
+	static public void load(String file) {
+		
+	}
 }
