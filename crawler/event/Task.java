@@ -1,5 +1,5 @@
 package event;
 
-public abstract class Task extends Thread {
-	public abstract void init();
+public abstract class Task {
+	public abstract void serverInit();
 }

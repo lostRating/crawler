@@ -5,6 +5,7 @@ import java.net.Socket;
 import common.Config;
 import common.Core;
 import event.Event;
+import work.WorkFailException;
 
 public class EventSender extends BaseConnection {
 	private String ip;
@@ -28,20 +29,24 @@ public class EventSender extends BaseConnection {
 			int r = Math.min(l + size, str.length());
 			this.sendString(str.substring(l, r));
 		}
+		
+		if (!"ACK".equals(this.readString()))
+			throw new WorkFailException("socket.EventSender.transaction");
 	}
 	
-	public void send() {
-		for (int i = 0; i < Config.eventSenderRetryTimes; ++i) {
+	public void send() throws WorkFailException {
+		for (int i = 0; i < Config.eventSenderRetryTimes; ++i)
 			try {
-				new BaseConnector(ip, port, this, Config.eventSenderDefaultTimeout, 1).start();
+				new BaseConnector(ip, port, this, Config.eventSenderSocketTimeout).run();
 				return;
 			} catch (Exception e) {
+				e.printStackTrace();
 				try {
 					Thread.sleep(Config.eventSenderFailWaitTime);
 				} catch (Exception ex) {
 					ex.printStackTrace();
 				}
 			}
-		}
+		throw new WorkFailException("socket.EventSender.send");
 	}
 }

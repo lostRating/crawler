@@ -1,6 +1,6 @@
-package common;
+package work;
 
-public class WorkFailException extends Exception {
+public class WorkFailException extends RuntimeException {
 	public WorkFailException() {
 		super();
 	}

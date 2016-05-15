@@ -91,57 +91,70 @@ public class DbConnector {
 		}
 	}
 	
-	Connection getUrl() {
-		try {
-			Connection conn = DriverManager.getConnection(
-					DbConfig.getUrl(),
-					DbConfig.userName,
-					DbConfig.password);
-			return conn;
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return null;
+	String ip;
+	String userName;
+	String password;
+	String database;
+	
+	public DbConnector setIp(String ip) {
+		this.ip = ip;
+		return this;
 	}
 	
-	public Connection getConnection() {
-		try {
-			Connection conn = DriverManager.getConnection(
-					DbConfig.getDb(),
-					DbConfig.userName,
-					DbConfig.password);
-			return conn;
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return null;
+	public DbConnector setUserName(String userName) {
+		this.userName = userName;
+		return this;
 	}
 	
-	public DbConnector() {
-		try {
-			Class.forName("com.mysql.jdbc.Driver");
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+	public DbConnector setPassword(String password) {
+		this.password = password;
+		return this;
+	}
+	
+	public DbConnector setDatabase(String database) {
+		this.database = database;
+		return this;
+	}
+	
+	String getUrl() {
+		return "jdbc:mysql://" + ip;
+	}
+	
+	String getDb() {
+		return "jdbc:mysql://" + ip + "/" + database;
+	}
+	
+	Connection getUrlConnection() throws SQLException {
+		return DriverManager.getConnection(getUrl(), userName, password);
+	}
+	
+	public Connection getConnection() throws SQLException {
+		return DriverManager.getConnection(getDb(), userName, password);
+	}
+	
+	public DbConnector() throws ClassNotFoundException {
+		Class.forName("com.mysql.jdbc.Driver");
 	}
 	
 	public void init() throws SQLException {
 		clear();
-		executeSQL("CREATE DATABASE " + DbConfig.dbName);
+		getUrlConnection().createStatement().execute("CREATE DATABASE " + getDb());
 	}
 	
 	public void clear() throws SQLException {
-		executeSQL("DROP DATABASE IF EXISTS " + DbConfig.dbName);
+		getUrlConnection().createStatement().execute("DROP DATABASE IF EXISTS " + getDb());
 	}
 	
 	public void executeSQL(String sql) throws SQLException {
-		Connection con = getConnection();
-		Statement stmt = con.createStatement();
-		stmt.execute(sql);
+		getConnection().createStatement().execute(sql);
 	}
 	
 	public DbOperation setTable(String tableName) {
 		return new DbOperation(tableName);
+	}
+	
+	public void createTable(Table table) throws SQLException {
+		executeSQL(table.getCreateTableStatement());
 	}
 	
 	static public void main(String args[]) {

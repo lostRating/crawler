@@ -14,15 +14,12 @@ import event.Event;
 import event.EventType;
 
 public class ClientManager {
-	private ServerCore core;
-	private Map<String, String> ipToClientKey;
-	private Map<String, LinkedList<Event>> clientKeyToJob;
-	private String clientKeyLock = new String("0"); //ipPortToClientKey, clientKeyToJob
+	ServerCore core;
+	Map<String, Long> lastTime;
 	
 	public ClientManager(ServerCore core) {
 		this.core = core;
-		ipToClientKey = new HashMap<String, String>();
-		clientKeyToJob = new HashMap<String, LinkedList<Event>>();
+		lastTime = new HashMap<String, Long>();
 	}
 	
 	public void clientOnline(String ip) {
@@ -31,8 +28,7 @@ public class ClientManager {
 		String clientKey;
 		synchronized (clientKeyLock) {
 			while (true) {
-				long num = new Random().nextLong();
-				clientKey = Long.toHexString(num);
+				clientKey = Long.toHexString(new Random().nextLong());
 				if (clientKeyToJob.containsKey(clientKey)) continue;
 				
 				ipToClientKey.put(ip, clientKey);
@@ -41,13 +37,8 @@ public class ClientManager {
 			}
 		}
 		
-		Event event = new Event();
-		event.setEventType(EventType.Initialize).setClientKey(clientKey);
-		event.setParameter("local", String.valueOf(Config.clientLocalWorker));
-		event.setParameter("proxy", String.valueOf(Config.clientProxyWorker));
-		event.setParameter("sender", String.valueOf(Config.clientSender));
+		Event event = new Event().setEventType(EventType.Initialize).setClientKey(clientKey);
 		
-		for (int i = 0; i < 5; ++i)
 		core.addEventSender(new EventSender(ip, Config.clientPort, event));
 	}
 	

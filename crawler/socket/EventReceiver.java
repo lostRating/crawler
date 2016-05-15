@@ -5,7 +5,7 @@ import common.Core;
 import com.google.gson.Gson;
 
 public class EventReceiver extends BaseConnection {
-	private Core core;
+	Core core;
 	
 	public EventReceiver(Socket socket, Core core) {
 		this.setSocket(socket);
@@ -14,13 +14,20 @@ public class EventReceiver extends BaseConnection {
 	
 	@Override
 	protected void transaction() throws Exception {
-		String ip = socket.getInetAddress().getHostAddress();
-		int port = socket.getPort(); 
-				
-		String str = "";
-		int cnt = this.readInt();
-		for (int i = 0; i < cnt; ++i)
-			str += this.readString();
-		core.handleEvent(ip, str);
+		try {
+			String ip = socket.getInetAddress().getHostAddress();
+			
+			String str = "";
+			int cnt = this.readInt();
+			for (int i = 0; i < cnt; ++i)
+				str += this.readString();
+
+			core.receiveEvent(ip, str);
+			
+			this.sendString("ACK");
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 }

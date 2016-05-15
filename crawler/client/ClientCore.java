@@ -8,6 +8,7 @@ import common.Core;
 import common.Config;
 import event.*;
 import socket.BaseConnector;
+import socket.EventReceiver;
 import socket.EventSender;
 
 import com.google.gson.*;
@@ -37,7 +38,7 @@ public class ClientCore extends Core {
 			@Override
 			public void run() {
 				if (clientKey == null) {
-					new EventSender(host, port, new Event().setEventType(EventType.ClientOnline)).send();
+					//new EventSender(host, port, new Event().setEventType(EventType.ClientOnline)).send();
 				}
 				else return;
 				try {
@@ -56,16 +57,10 @@ public class ClientCore extends Core {
 	
 	@Override
 	public void handleEvent(String ip, String json) {
-		Event event = Event.fromJson(json);
+/*		Event event = Event.fromJson(json);
 		if (event.getEventType() != EventType.Initialize && clientKey == null) return;
 		if (event.getEventType() == EventType.Initialize) {
 			initialize(event);
-		}
-	}
-
-	@Override
-	public EventSender fetchEventSender() {
-		// TODO Auto-generated method stub
-		return null;
+		}*/
 	}
 }

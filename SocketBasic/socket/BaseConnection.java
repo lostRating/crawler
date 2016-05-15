@@ -11,6 +11,7 @@ import java.net.Socket;
 
 
 import basic.ByteOps;
+import work.WorkFailException;
 
 public abstract class BaseConnection extends Thread {
 	protected Socket socket;
@@ -98,7 +99,7 @@ public abstract class BaseConnection extends Thread {
 	public void setSocket(Socket socket) {
 		this.socket = socket;
 	}
-
+	
 	@Override
 	public void run() {
 		try {
@@ -106,14 +107,16 @@ public abstract class BaseConnection extends Thread {
 			input = new BufferedInputStream(socket.getInputStream());
 
 			transaction();
-
+			
 		} catch (Exception e) {
 			e.printStackTrace();
-		}
-		try {
-			socket.close();
-		} catch (Exception ex) {
-			ex.printStackTrace();
+			throw new WorkFailException("socket.BaseConnection.run");
+		} finally {
+			try {
+				socket.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 	}
 

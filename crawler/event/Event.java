@@ -9,18 +9,28 @@ import common.GsonUtils;
 
 public class Event {
 	public class SessionInfo {
+		public String taskName;
 		public EventType eventType;
 		public String clientKey;
 	}
 	
-	private SessionInfo sessionInfo;
-	private Map<String, String> parameters;
-	private String handler;
+	SessionInfo sessionInfo;
+	Map<String, String> parameters;
+	String handler;
 	
 	public Event() {
 		sessionInfo = new SessionInfo();
 		parameters = new HashMap<String, String>();
 		handler = "";
+	}
+	
+	public Event setTaskName(String taskName) {
+		this.sessionInfo.taskName = taskName;
+		return this;
+	}
+	
+	public String getTaskName() {
+		return this.sessionInfo.taskName;
 	}
 	
 	public Event setEventType(EventType eventType) {

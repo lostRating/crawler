@@ -1,4 +1,4 @@
-package common;
+package work;
 
 public abstract class Work {
 	String workType;
@@ -12,5 +12,5 @@ public abstract class Work {
 		return workType;
 	}
 	
-	public abstract void execute() throws WorkFailException;
+	public abstract void execute() throws Exception;
 }

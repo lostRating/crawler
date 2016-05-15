@@ -6,5 +6,6 @@ public enum EventType {
 	Initialize, //server -> client
 	Restart, //server -> client
 	Heartbeat, //server -> client -> server
-	Job; //server -> client -> server
+	Job, //server -> client -> server
+	NewTask; //user -> server
 }

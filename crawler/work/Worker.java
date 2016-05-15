@@ -1,4 +1,6 @@
-package common;
+package work;
+
+import common.Config;
 
 public class Worker extends Thread {
 	WorkManager workManager;
@@ -11,9 +13,10 @@ public class Worker extends Thread {
 	public void run() {
 		while (true) {
 			Work work = workManager.getWork();
+			if (work == null) continue;
 			try {
 				work.execute();
-			} catch (WorkFailException e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 				if (++work.failCount < Config.workRetryTimes)
 					workManager.addWork(work);

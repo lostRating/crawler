@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 public class Table {
-	private String tableName;
+	String tableName;
 	
 	public class Schema {
 		String columnName, type;
@@ -44,11 +44,11 @@ public class Table {
 	
 	ArrayList<Schema> schemas = new ArrayList<Schema>();
 	
-	public Table(String tableName) {
+	public Table(String tableName) throws TableErrorException {
 		this.tableName = tableName;
 	}
 	
-	public Schema addSchema(String name, String type) {
+	public Schema addSchema(String name, String type) throws TableErrorException {
 		Schema sch = new Schema(name, type);
 		sch.isPrimaryKey = false;
 		sch.isIndex = false;
