@@ -17,9 +17,9 @@ public class Config {
 	static public int clientWorkerSize = 10;
 	static public int workRetryTimes = 3;
 	
-	static public String databaseIp = "";
-	static public String databaseUserName = "";
-	static public String databasePassword = "";
+	static public String databaseIp = "mydbinstance.coyk1getlquj.ap-northeast-1.rds.amazonaws.com";
+	static public String databaseUserName = "awsuser";
+	static public String databasePassword = "123456789";
 	
 	static public void load(String file) {
 		

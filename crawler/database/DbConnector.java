@@ -12,6 +12,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import common.Config;
+
 public class DbConnector {
 	
 	public class DbOperation {
@@ -82,7 +84,7 @@ public class DbConnector {
 			}
 			if (limit != null)
 				sql += " limit " + limit.intValue();
-			System.out.println(sql);
+			//System.out.println(sql);
 			PreparedStatement stmt = getConnection().prepareStatement(sql);
 			for (int i = 0; i < vals.size(); ++i) {
 				stmt.setString(i + 1, vals.get(i));
@@ -120,8 +122,12 @@ public class DbConnector {
 		return "jdbc:mysql://" + ip;
 	}
 	
-	String getDb() {
+	String getDbUrl() {
 		return "jdbc:mysql://" + ip + "/" + database;
+	}
+	
+	String getDatabase() {
+		return database;
 	}
 	
 	Connection getUrlConnection() throws SQLException {
@@ -129,7 +135,7 @@ public class DbConnector {
 	}
 	
 	public Connection getConnection() throws SQLException {
-		return DriverManager.getConnection(getDb(), userName, password);
+		return DriverManager.getConnection(getDbUrl(), userName, password);
 	}
 	
 	public DbConnector() throws ClassNotFoundException {
@@ -138,11 +144,13 @@ public class DbConnector {
 	
 	public void init() throws SQLException {
 		clear();
-		getUrlConnection().createStatement().execute("CREATE DATABASE " + getDb());
+		getUrlConnection().createStatement().execute("create database " + getDatabase());
 	}
 	
 	public void clear() throws SQLException {
-		getUrlConnection().createStatement().execute("DROP DATABASE IF EXISTS " + getDb());
+		Connection conn = getUrlConnection();
+		Statement stmt = conn.createStatement();
+		stmt.execute("drop database if exists " + getDatabase());
 	}
 	
 	public void executeSQL(String sql) throws SQLException {
@@ -159,7 +167,7 @@ public class DbConnector {
 	
 	static public void main(String args[]) {
 		try {
-			DbConnector db = new DbConnector();
+			DbConnector db = new DbConnector().setIp(Config.databaseIp).setUserName(Config.databaseUserName).setPassword(Config.databasePassword).setDatabase("test");
 			db.init();
 			Table wiki = new Table("WIKI");
 			wiki.addSchema("logId", "INT").setAutoInc();
